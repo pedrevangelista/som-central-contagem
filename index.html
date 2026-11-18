@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guia da Mesa</title>
+<link rel="stylesheet" href="lab.css">
+<style>
+/* Visual "Console": parece a própria mesa. Grafite, botões de hardware com LED,
+   fitas coloridas como a tela da Wing. Sempre escuro, como a cabine de som.
+   Sem fontes ou scripts externos: precisa funcionar sem internet. */
+:root {
+  color-scheme: dark;
+  --bg: #15171a;
+  --surface: #1e2125;
+  --surface-2: #272b31;
+  --line: #2f343b;
+  --edge: #0b0c0e;
+  --fg: #dce1e7;
+  --muted: #8d959f;
+  --accent: #ffb02e;
+  --accent-fg: #1a1205;
+  --ok: #3ddc84;
+  --warn: #ffd23f;
+  --stop: #ff5a52;
+  --ok-bg: #132a1f;
+  --warn-bg: #2e2810;
+  --stop-bg: #331717;
+  --key: linear-gradient(#2b2f35, #202328);
+  --key-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 2px 0 var(--edge);
+  --panel-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+  --font: Bahnschrift, "DIN Alternate", "Segoe UI", system-ui, sans-serif;
+  --mono: Consolas, "SF Mono", Menlo, "Roboto Mono", monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 var(--font);
+  -webkit-text-size-adjust: 100%;
+}
+h1, h2, h3, p { margin: 0; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+[hidden] { display: none !important; }
+
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; }
+
+/* Cabeçalho */
+/* Menu lateral: coluna de botões, como uma fileira da mesa */
+.side {
+  position: fixed; top: 0; bottom: 0; left: 0; width: 232px; z-index: 6;
+  display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+  padding: calc(18px + env(safe-area-inset-top, 0px)) 12px calc(14px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
+  background: linear-gradient(90deg, #1b1e22, #181a1e); border-right: 1px solid var(--edge); box-shadow: 1px 0 0 var(--line);
+}
+.side .brand { padding: 0 4px; flex-wrap: wrap; gap: 8px 10px; }
+.side .mesa { padding: 0 4px; margin-top: auto; }
+.nav-sep { font-size: .7rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); padding: 8px 4px 0; }
+.conteudo { margin-left: 232px; min-width: 0; }
+.top { display: none; }
+.veu { display: none; }
+@media (max-width: 899px) {
+  .side { width: min(280px, 82vw); transform: translateX(-102%); transition: transform .2s ease; visibility: hidden; }
+  .menu-aberto .side { transform: none; visibility: visible; box-shadow: 1px 0 0 var(--line), 12px 0 40px rgba(0,0,0,.6); }
+  .menu-aberto .veu { display: block; position: fixed; inset: 0; z-index: 5; background: rgba(0,0,0,.55); }
+  .conteudo { margin-left: 0; }
+  .top {
+    display: flex; align-items: center; gap: 12px; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 4; padding: 10px 16px;
+    background: linear-gradient(#1b1e22, #15171a); border-bottom: 1px solid var(--edge); box-shadow: 0 1px 0 var(--line);
+  }
+}
+@media (prefers-reduced-motion: reduce) { .side { transition: none; } }
+.menu-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 14px; cursor: pointer;
+  background: var(--key); border: 1px solid var(--edge); border-radius: 4px; box-shadow: var(--key-shadow);
+  font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em;
+}
+.atual { font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; display: flex; align-items: center; gap: 8px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.atual::before { content: ""; width: 8px; height: 8px; border-radius: 50%; flex: none; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.atual.sos::before { background: var(--stop); box-shadow: 0 0 8px var(--stop); }
+.atual .mi { order: -1; width: 19px; height: 19px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 4px rgba(255,176,46,.6)); }
+.atual.sos .mi { stroke: var(--stop); filter: drop-shadow(0 0 4px rgba(255,90,82,.7)); }
+.atual:has(.mi)::before { display: none; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand h1 { font-size: 1.15rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; }
+.scene { font: 700 .78rem var(--mono); letter-spacing: .08em; color: #1a1205; background: var(--accent); border-radius: 3px; padding: 2px 8px; white-space: nowrap; box-shadow: 0 0 10px rgba(255,176,46,.35); }
+.mesa { display: inline-flex; align-items: center; gap: 8px; font: .76rem var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.mesa i { width: 9px; height: 9px; border-radius: 50%; background: #4a2020; box-shadow: inset 0 0 2px #000; flex: none; }
+.mesa.on { color: var(--ok); }
+.mesa.on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+
+.tabs { display: flex; flex-direction: column; gap: 6px; }
+.tabs a.sos { background: linear-gradient(#5a1f1c, #3d1513); border-color: #1a0605; color: #ffd9d6; }
+/* Símbolo à esquerda, LED à direita */
+.tabs a .mi { width: 19px; height: 19px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; color: var(--muted); }
+.tabs a.sos .mi { color: #ff9d96; }
+.tabs a[aria-current="page"] .mi { color: var(--accent); filter: drop-shadow(0 0 4px rgba(255,176,46,.6)); }
+.tabs a.sos[aria-current="page"] .mi { color: #fff; filter: drop-shadow(0 0 4px rgba(255,90,82,.8)); }
+.tabs a {
+  gap: 11px; padding: 8px 28px 8px 12px; min-height: 42px; display: flex; align-items: center; position: relative;
+  color: var(--fg); text-decoration: none; font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .06em;
+  background: var(--key); border: 1px solid var(--edge); border-radius: 4px; box-shadow: var(--key-shadow);
+}
+.tabs a::before { content: ""; position: absolute; right: 11px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: #3a3122; }
+.tabs a.sos::before { background: #7a2b26; }
+.tabs a[aria-current="page"] { color: #fff; }
+.tabs a[aria-current="page"]::before { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.tabs a.sos[aria-current="page"]::before { background: var(--stop); box-shadow: 0 0 8px var(--stop); }
+.tabs a:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 var(--edge); }
+
+main { padding-block: 22px 56px; }
+.view { display: flex; flex-direction: column; gap: 20px; }
+.lead { color: var(--muted); max-width: 62ch; }
+h2 { font-size: 1.45rem; font-weight: 600; letter-spacing: .01em; }
+h3 { font-size: .78rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.group { display: flex; flex-direction: column; gap: 8px; }
+.group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.group-head span { font: .8rem var(--mono); color: var(--muted); }
+
+/* Emergência */
+.sos-list { display: flex; flex-direction: column; gap: 10px; }
+.sos-item { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid #3d2222; border-radius: 6px; box-shadow: var(--panel-shadow); }
+.sos-item[open] { border-color: var(--line); border-left-color: var(--stop); }
+.sos-item summary {
+  list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 16px; min-height: 60px; font-size: 1.12rem; font-weight: 600;
+}
+.sos-item summary::-webkit-details-marker { display: none; }
+.sos-item summary::after {
+  content: "+"; font: 700 1.1rem var(--mono); color: var(--fg); line-height: 1; flex: none;
+  width: 30px; height: 30px; display: grid; place-items: center; border-radius: 4px;
+  background: var(--key); border: 1px solid var(--edge); box-shadow: var(--key-shadow);
+}
+.sos-item[open] summary::after { content: "\2212"; }
+.sos-item[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.sos-body { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 14px; }
+ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; }
+ol.steps li::before {
+  content: counter(s); font: 700 .9rem var(--mono); width: 28px; height: 28px; border-radius: 3px;
+  display: grid; place-items: center; background: var(--accent); color: var(--accent-fg);
+}
+ol.steps li > span { padding-top: 2px; min-width: 0; }
+.sos-item.topic { border-left-color: #3a3122; }
+.sos-item.topic[open] { border-left-color: var(--accent); }
+.topic .sos-body { gap: 16px; }
+.topic h4 { margin: 0 0 6px; font-size: .76rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+.topic p { max-width: 62ch; }
+.topic ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; max-width: 62ch; }
+.topic .where { font: 600 .78rem var(--mono); color: var(--muted); font-weight: 400; margin-left: auto; white-space: nowrap; }
+.topic summary { flex-wrap: wrap; }
+.topic summary::after { margin-left: 0; }
+.care { background: var(--warn-bg); border: 1px solid #4a3f12; border-radius: 4px; padding: 12px 14px; }
+.care h4 { color: var(--warn); display: flex; align-items: center; gap: 8px; }
+.care h4::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 7px var(--warn); }
+.freq { border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: #181a1e; }
+.freq div { display: grid; grid-template-columns: 92px 1fr; gap: 12px; padding: 9px 12px; border-top: 1px solid var(--line); }
+.freq div:first-child { border-top: 0; }
+.freq b { font: 700 .86rem var(--mono); font-variant-numeric: tabular-nums; color: var(--accent); padding-top: 2px; }
+.freq span { min-width: 0; }
+.freq small { display: block; color: var(--muted); font-size: .88rem; }
+.chain { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; counter-reset: c; }
+.chain li { counter-increment: c; display: grid; grid-template-columns: 30px 1fr; gap: 10px; }
+.chain li::before { content: counter(c); font: 700 .9rem var(--mono); width: 30px; height: 30px; border-radius: 3px; display: grid; place-items: center; background: var(--key); border: 1px solid var(--edge); box-shadow: var(--key-shadow); color: var(--accent); }
+.chain li span { min-width: 0; }
+.chain small { display: block; color: var(--muted); font-size: .9rem; }
+.pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.pick button {
+  background: var(--key); border: 1px solid var(--edge); border-radius: 4px; box-shadow: var(--key-shadow);
+  padding: 8px 14px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+}
+.pick button[aria-pressed="true"] { background: linear-gradient(#ffbe4d, #f59f12); border-color: #6b4300; color: var(--accent-fg); font-weight: 700; box-shadow: 0 0 12px rgba(255,176,46,.3), 0 2px 0 var(--edge); }
+.pick-label { font-weight: 600; }
+
+/* Listas de canais e buses */
+.search {
+  width: 100%; padding: 12px 14px; min-height: 48px; border-radius: 4px;
+  background: #101215; border: 1px solid var(--edge); box-shadow: inset 0 2px 4px rgba(0,0,0,.4); font-family: var(--mono);
+}
+.search::placeholder { color: var(--muted); }
+.rows { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; box-shadow: var(--panel-shadow); }
+.row { display: grid; grid-template-columns: 34px 12px 1fr auto; gap: 12px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.row .n { font: 700 .95rem var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; }
+.row .name { min-width: 0; font-weight: 600; }
+.row .name small { display: block; font-weight: 400; font-size: .86rem; color: var(--muted); }
+.row.dim .name { color: var(--muted); font-weight: 400; }
+/* Fita de cor, como a tela de cada canal na Wing */
+.dot { width: 12px; height: 28px; border-radius: 2px; background: #2c3036; border: 1px solid rgba(255,255,255,.18); flex: none; box-shadow: 0 0 8px rgba(255,255,255,.06); }
+.dot.none { background: #22262b; border-color: transparent; }
+/* Símbolo do canal: tecla escura com o desenho e uma faixa na cor do canal */
+.row.ch { grid-template-columns: 34px 40px 1fr auto; }
+.ico {
+  --c: #4a4f57; width: 40px; height: 40px; border-radius: 4px; display: grid; place-items: center; flex: none;
+  color: var(--c); background: #101215; border: 1px solid var(--edge);
+  box-shadow: inset 0 -3px 0 var(--c), 0 0 10px color-mix(in srgb, var(--c) 18%, transparent);
+}
+.ico svg { width: 24px; height: 24px; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--c) 45%, transparent)); }
+.ico.inv { color: #101215; background: #9ea4ab; box-shadow: inset 0 -3px 0 #101215; }
+.ico.inv svg { filter: none; }
+.row .name small.cor { display: block; font: 600 .7rem var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.row .name small + small.cor { margin-top: 2px; }
+.tag { font: 700 .7rem var(--mono); letter-spacing: .05em; text-transform: uppercase; border-radius: 3px; padding: 3px 7px; white-space: nowrap; border: 1px solid; }
+.tag.who { color: var(--fg); border-color: #444a52; background: #181a1e; }
+.tag.mute { background: var(--stop-bg); color: var(--stop); }
+.tag.empty { color: var(--muted); border-color: var(--line); }
+.pending { border: 1px dashed var(--line); border-radius: 6px; padding: 14px; color: var(--muted); font-family: var(--mono); font-size: .9rem; }
+.empty-msg { color: var(--muted); padding: 8px 0; }
+
+/* Checklists */
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-top: 1px solid var(--line); cursor: pointer; min-height: 48px; }
+.check:first-child { border-top: 0; }
+.check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+.check input:checked + span { color: var(--muted); text-decoration: line-through; }
+.check.importante { box-shadow: inset 4px 0 0 var(--accent); background: rgba(255,176,46,.06); }
+.check.importante > span:not(.tag) { font-weight: 600; flex: 1; }
+.tag.imp { margin-left: auto; align-self: center; color: var(--accent-fg); background: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px rgba(255,176,46,.35); text-decoration: none; }
+.check span small { display: block; color: var(--muted); font-size: .86rem; text-decoration: none; }
+.onde { margin: 6px 0 0; font-size: .9rem; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+.onde::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 7px var(--accent); }
+.btn {
+  align-self: flex-start; background: var(--key); border: 1px solid var(--edge); border-radius: 4px; box-shadow: var(--key-shadow);
+  padding: 10px 16px; min-height: 44px; cursor: pointer; font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .06em;
+}
+.btn:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 1px 0 var(--edge); }
+
+/* Regras */
+.rule { background: var(--surface); border-radius: 6px; padding: 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); border-top: 3px solid; box-shadow: var(--panel-shadow); }
+.rule h3 { color: inherit; display: flex; align-items: center; gap: 9px; }
+.rule h3::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: 0 0 9px currentColor; }
+.rule ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; color: var(--fg); }
+.rule li small { display: block; color: var(--muted); font-size: .88rem; }
+.rule.ok { color: var(--ok); border-top-color: var(--ok); }
+.rule.warn { color: var(--warn); border-top-color: var(--warn); }
+.rule.stop { color: var(--stop); border-top-color: var(--stop); }
+.note { font-size: .9rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 12px; max-width: 62ch; }
+.error { background: var(--stop-bg); color: var(--stop); border: 1px solid var(--stop); border-radius: 4px; padding: 12px 14px; font-family: var(--mono); }
+</style>
+</head>
+<body>
+
+<div class="app">
+<aside class="side" id="side">
+  <div class="brand">
+    <h1>Guia da Mesa</h1>
+    <span class="scene" id="cena">BASE A</span>
+  </div>
+  <nav class="tabs" aria-label="Seções">
+    <a href="#emergencia" class="sos"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.2v.3"/></svg><span>Emergência</span></a>
+    <span class="nav-sep" aria-hidden="true">Seções</span>
+    <a href="#mesa"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v18M12 3v18M18 3v18"/><rect x="3.5" y="13" width="5" height="3" rx="1"/><rect x="9.5" y="6" width="5" height="3" rx="1"/><rect x="15.5" y="10" width="5" height="3" rx="1"/></svg><span>Mesa</span></a>
+    <a href="#canais"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7"/></svg><span>Canais</span></a>
+    <a href="#buses"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/></svg><span>Buses</span></a>
+    <a href="#processamento"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M6.5 17.5l6-6 5-2"/><path d="M12.5 11.5l5-5" stroke-dasharray="1.5 2"/></svg><span>Processamento</span></a>
+    <a href="#eq"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12h19" opacity=".4"/><path d="M2.5 14c3.5 0 3.5-7 7-7s3 10 6.5 10 3.5-5 5.5-5"/></svg><span>EQ</span></a>
+    <a href="#checklists"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5l1.8 1.8 3.2-3.3M3.5 13.5l1.8 1.8 3.2-3.3"/><path d="M11.5 7h9M11.5 14h9M11.5 20h9M4 20h4"/></svg><span>Checklists</span></a>
+    <a href="#regras"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="7.5" y="2" width="9" height="20" rx="3"/><circle cx="12" cy="6.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="17.5" r="1.8"/></svg><span>O que mexer</span></a>
+  </nav>
+  <span class="mesa" id="mesa" title=""><i></i><span id="mesa-txt">Mesa: verificando</span></span>
+</aside>
+<div class="veu" id="veu"></div>
+
+<div class="conteudo">
+<header class="top">
+  <button type="button" class="menu-btn" id="btn-menu" aria-expanded="false" aria-controls="side"><span aria-hidden="true">&#9776;</span> Menu</button>
+  <span class="atual" id="atual"></span>
+</header>
+
+<main class="wrap">
+  <div id="erro" class="error" hidden></div>
+
+  <section class="view" id="v-emergencia">
+    <div class="group">
+      <h2>Deu problema. O que está acontecendo?</h2>
+      <p class="lead">Toque no problema e siga os passos na ordem. Eles vão do mais provável para o menos provável.</p>
+    </div>
+    <div class="sos-list" id="sos"></div>
+  </section>
+
+  <section class="view" id="v-mesa" hidden>
+    <div class="group">
+      <h2>A mesa, área por área</h2>
+      <p class="lead">Toque em qualquer parte da foto para ver o que ela faz e se pode mexer. Os roteiros mostram, passo a passo, onde apertar em cada situação.</p>
+    </div>
+    <div id="mesa-app" class="view"></div>
+  </section>
+
+  <section class="view" id="v-eq" hidden>
+    <div class="group">
+      <h2>Laboratório de EQ</h2>
+      <p class="lead">Arraste os pontos da curva, toque um som e ouça o que cada ajuste faz. Tudo aqui é treino: nada muda na mesa.</p>
+    </div>
+    <div id="eq-app" class="view"></div>
+  </section>
+
+  <section class="view" id="v-canais" hidden>
+    <div class="group">
+      <h2>Canais de entrada</h2>
+      <p class="lead">Cada página da mesa mostra 12 canais. Procure pelo instrumento ou pela cor do microfone.</p>
+    </div>
+    <details class="sos-item topic">
+      <summary>Os faders têm dois modos <span class="where">sends on fader</span></summary>
+      <div class="sos-body">
+        <div>
+          <h4>Modo normal</h4>
+          <p>Cada fader é o volume daquele canal no salão. Subiu o fader do violão, o violão fica mais alto para a igreja.</p>
+        </div>
+        <div>
+          <h4>Sends on fader</h4>
+          <p>Com um bus selecionado e o botão SENDS ON FADER aceso, os mesmos faders mudam de função: passam a mostrar quanto de cada canal vai para aquele bus. Subiu o fader do violão, o violão fica mais alto só naquele fone ou naquele efeito. O salão não muda.</p>
+        </div>
+        <div>
+          <h4>Como saber em qual modo você está</h4>
+          <p>Pelo botão. Aceso, os faders são envios para o bus selecionado. Apagado, são o som do salão. Os faders se movem sozinhos quando você entra e sai do modo, porque cada modo guarda as suas posições.</p>
+        </div>
+        <div class="care">
+          <h4>Atenção</h4>
+          <p>Olhe o botão antes de mexer em qualquer fader. Esquecer o modo ligado e tentar mixar o salão muda o fone de alguém sem você perceber. O passo a passo está na aba Buses.</p>
+        </div>
+      </div>
+    </details>
+    <details class="sos-item topic" id="dca">
+      <summary>DCA: um fader que comanda vários <span class="where">camada DCA</span></summary>
+      <div class="sos-body">
+        <div>
+          <h4>O que é</h4>
+          <p>DCA é um fader de controle. Ele não carrega som: só sobe e desce, de uma vez, todos os canais que estão ligados a ele. Os canais mantêm o equilíbrio entre si e o DCA comanda o volume do conjunto.</p>
+          <p>Exemplo: o DCA Vocais. A banda cresceu e as vozes sumiram? Sobe o DCA e os três microfones sobem juntos, sem estragar o equilíbrio entre eles. O Lead tem DCA próprio para ficar na frente.</p>
+        </div>
+        <div>
+          <h4>Os DCAs da cena BASE A</h4>
+          <div class="rows" id="dca-lista"></div>
+          <p class="note" id="dca-nota"></p>
+        </div>
+        <div>
+          <h4>Um canal em dois DCAs</h4>
+          <p>Um canal pode estar em mais de um DCA. O violão, por exemplo, provavelmente está em Cordas e em Banda: os dois mexem nele. Banda baixa tudo que é instrumento de uma vez, e Cordas ajusta só aquele grupo dentro da banda.</p>
+        </div>
+        <div>
+          <h4>Onde fica</h4>
+          <p>Nos faders do centro: aperte o botão DCA ao lado deles. A Wing tem 16 DCAs, cada um com nome e cor na tela de cima, como os canais.</p>
+        </div>
+        <div>
+          <h4>Como o DCA mexe no som</h4>
+          <ul>
+            <li><strong>Fader do DCA:</strong> soma ao fader de cada canal. DCA em 0 deixa os canais como estão; abaixo de 0, todos abaixam.</li>
+            <li><strong>MUTE do DCA:</strong> muta todos os canais dele de uma vez. Útil para fechar todas as vozes entre as músicas.</li>
+            <li><strong>Fones:</strong> o DCA não mexe nos retornos dos músicos, porque os envios de retorno costumam sair antes do fader. Os efeitos, que saem depois do fader, acompanham o DCA.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>DCA não é bus</h4>
+          <p>O bus 11 (Bateria LR) junta o som da bateria num lugar só e comprime tudo junto. Um DCA de bateria só subiria e desceria os faders, sem juntar nem processar nada. Por isso um não substitui o outro.</p>
+        </div>
+        <div class="care">
+          <h4>Atenção</h4>
+          <p>Canal baixo ou mudo mesmo com o fader dele em cima: olhe os DCAs. Um DCA abaixado ou mutado segura todos os canais dele. Lembre do Banda: abaixado, ele segura todos os instrumentos.</p>
+        </div>
+      </div>
+    </details>
+    <input class="search" id="busca" type="search" placeholder="Procurar: bumbo, verde, pastor, 14" aria-label="Procurar canal">
+    <div id="canais" class="view"></div>
+  </section>
+
+  <section class="view" id="v-buses" hidden>
+    <div class="group">
+      <h2>Buses</h2>
+      <p class="lead">Os 16 buses da cena fazem três trabalhos diferentes: retorno dos músicos, grupo da bateria e efeitos.</p>
+    </div>
+    <details class="sos-item topic" open>
+      <summary>Como mixar um bus <span class="where">sends on fader</span></summary>
+      <div class="sos-body">
+        <div>
+          <h4>A ideia</h4>
+          <p>Cada bus é uma mixagem separada, feita com os mesmos canais. O sends on fader coloca essa mixagem nos faders, para você ajustar o fone de um músico do mesmo jeito que ajusta o salão.</p>
+        </div>
+        <div>
+          <h4>Passo a passo</h4>
+          <ol class="chain">
+            <li><span><strong>Selecione o bus</strong><small>Por exemplo o bus 6, fone do mic verde.</small></span></li>
+            <li><span><strong>Aperte SENDS ON FADER</strong><small>O botão acende e os faders dos canais vão para as posições daquela mixagem.</small></span></li>
+            <li><span><strong>Ajuste pelos faders dos canais</strong><small>Agora eles são o fone daquela pessoa. Ela pediu mais violão: suba o fader do violão. Fader lá embaixo significa que o canal não vai para esse bus.</small></span></li>
+            <li><span><strong>Mude aos poucos e confirme com a pessoa</strong><small>Você não está ouvindo o que ela ouve.</small></span></li>
+            <li><span><strong>Aperte SENDS ON FADER de novo para sair</strong><small>Os faders voltam para o som do salão, onde estavam.</small></span></li>
+          </ol>
+        </div>
+        <div>
+          <h4>Envio do canal e volume do bus</h4>
+          <ul>
+            <li><strong>Envio</strong> é quanto de um canal entra no bus. É o que você ajusta no sends on fader.</li>
+            <li><strong>Fader do bus</strong> é o volume geral daquela mixagem. Se a pessoa quer tudo mais alto, é nele, e não em cada envio.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Vale também para os efeitos</h4>
+          <p>Selecione o bus 13 (FX Hall) e ligue o sends on fader: os faders mostram quanto reverb cada canal recebe. É o jeito mais rápido de ver quem está com efeito e quanto.</p>
+        </div>
+        <div class="care">
+          <h4>Atenção</h4>
+          <p>Saia do modo assim que terminar. Com ele ligado, um fader que você sobe pensando no salão vai parar no fone de alguém.</p>
+        </div>
+      </div>
+    </details>
+    <details class="sos-item topic" id="talkback">
+      <summary>Talkback: falar com os músicos <span class="where">TALK A e TALK B</span></summary>
+      <div class="sos-body">
+        <div>
+          <h4>O que é</h4>
+          <p>Um microfone só do técnico. Você escolhe para onde a sua voz vai: o fone de um músico, vários retornos ou, se precisar, o main. Serve para combinar a passagem de som, avisar uma mudança e responder pedidos.</p>
+        </div>
+        <div>
+          <h4>Os controles</h4>
+          <p>Ficam à esquerda da mesa, na seção de monitoração, embaixo da tela.</p>
+          <ul>
+            <li><strong>TALK A e TALK B:</strong> dois talkbacks. Nenhum tem destino fixo: o operador escolhe na hora para onde cada um vai.</li>
+            <li><strong>TALK LEVEL:</strong> volume da sua voz no destino.</li>
+            <li><strong>VIEW da seção:</strong> abre na tela a configuração do talkback, onde você marca os destinos.</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Passo a passo</h4>
+          <ol class="chain">
+            <li><span><strong>Abra a configuração do talkback</strong><small>Aperte o VIEW da seção de monitoração. A tela mostra os destinos do TALK A e do TALK B.</small></span></li>
+            <li><span><strong>Escolha para onde a voz vai</strong><small>Marque o bus de quem precisa ouvir. Só o baixo: bus 1. Todos os vocais: buses 6, 7, 8 e 10. Main e matrix também aparecem como destino, mas aí a igreja e a transmissão ouvem você.</small></span></li>
+            <li><span><strong>Desmarque o que não deve ouvir</strong><small>Sobrou marcado um destino da última vez? Tire agora, principalmente o main.</small></span></li>
+            <li><span><strong>Segure o TALK e fale</strong><small>Fale perto do microfone, curto e claro. Diga com quem está falando: "Baixo, vou subir o seu fone".</small></span></li>
+            <li><span><strong>Solte e confira</strong><small>O botão precisa apagar. Se continuar aceso, aperte de novo para desligar.</small></span></li>
+            <li><span><strong>Ouça a resposta</strong><small>O músico responde pelo microfone dele (em SOLO no seu fone) ou com um gesto.</small></span></li>
+          </ol>
+        </div>
+        <div>
+          <h4>Os destinos</h4>
+          <ul>
+            <li><strong>Um bus de retorno:</strong> só aquela pessoa ouve. É o uso mais comum.</li>
+            <li><strong>Vários buses:</strong> um grupo, como todos os vocais ou a banda inteira.</li>
+            <li><strong>Main:</strong> a igreja e a transmissão ouvem. Só para um aviso que deve ir para todos, e nunca por engano.</li>
+            <li><strong>Matrix:</strong> só se a sua equipe usa matrix para algum lugar específico. Confira antes para onde ela vai.</li>
+          </ul>
+          <p>Ter dois talkbacks ajuda: deixe, por exemplo, o A no bus do líder (bus 7) e o B na banda toda, e troque quando precisar.</p>
+        </div>
+        <div>
+          <h4>Bons hábitos</h4>
+          <ul>
+            <li>Durante a música, fale só se for necessário: a sua voz entra por cima do que o músico está ouvindo.</li>
+            <li>Nunca use o talkback durante uma fala ou oração. Espere, ou use gesto.</li>
+            <li>Combine gestos com a banda para quando não dá para falar: apontar para o ouvido e para cima é "mais de mim no fone".</li>
+          </ul>
+        </div>
+        <div class="care">
+          <h4>Atenção</h4>
+          <p>Antes de apertar TALK, olhe os destinos marcados. Main marcado por engano coloca a sua voz no salão e na transmissão. Onde fica o microfone de talkback ainda falta levantar.</p>
+        </div>
+      </div>
+    </details>
+    <div id="buses" class="view"></div>
+  </section>
+
+  <section class="view" id="v-processamento" hidden>
+    <div class="group">
+      <h2>Processamento</h2>
+      <p class="lead">O que cada ferramenta faz, quando usar e o que observar. A cena BASE A já vem ajustada: entenda antes de mexer, e mexa pouco.</p>
+    </div>
+
+    <div class="sos-list">
+
+      <details class="sos-item topic">
+        <summary>Equalização <span class="where">em cada canal</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O que faz</h4>
+            <p>Aumenta ou diminui faixas de frequência de um som. Serve para tirar o que sobra e abrir espaço para cada instrumento, não para deixar um canal bonito sozinho.</p>
+            <a class="ver" href="#eq">Abrir o laboratório de EQ, com curva interativa e áudio</a>
+          </div>
+          <div>
+            <h4>Mapa das frequências</h4>
+            <div class="freq">
+              <div><b>20–80 Hz</b><span>Subgrave<small>Peso do bumbo e do baixo. Em voz e violão é só ruído.</small></span></div>
+              <div><b>80–250 Hz</b><span>Grave<small>Corpo. Em excesso, o som fica embolado e sem definição.</small></span></div>
+              <div><b>250–500 Hz</b><span>Médio-grave<small>Som de caixa de papelão. É onde a mixagem costuma embolar.</small></span></div>
+              <div><b>500 Hz–2 kHz</b><span>Médio<small>Presença dos instrumentos. Em excesso, soa anasalado, como telefone.</small></span></div>
+              <div><b>2–5 kHz</b><span>Médio-agudo<small>Clareza da voz. Em excesso, cansa e machuca o ouvido.</small></span></div>
+              <div><b>5–10 kHz</b><span>Agudo<small>Brilho e definição. Também é onde mora o "s" chiado.</small></span></div>
+              <div><b>Acima de 10 kHz</b><span>Ar<small>Sensação de abertura. Pouca coisa resolve.</small></span></div>
+            </div>
+          </div>
+          <div>
+            <h4>Como usar</h4>
+            <ul>
+              <li>Corte antes de reforçar. Tirar o que incomoda quase sempre soa melhor do que aumentar o que falta.</li>
+              <li>Use o corte de graves (low cut) em tudo que não é bumbo e baixo. Em voz, algo perto de 100 Hz é um bom começo.</li>
+              <li>Cortes estreitos, reforços largos e suaves.</li>
+              <li>Ajuste ouvindo a banda toda. Um canal que soa magro sozinho pode estar perfeito no conjunto.</li>
+              <li>O analisador (RTA) na tela do EQ mostra onde está o pico. Use para confirmar o que você ouviu.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>O EQ do canal vale para o salão e para os fones. Um reforço grande nos agudos de uma voz também aumenta a chance de microfonia.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="sos-item topic">
+        <summary>Gate <span class="where">em cada canal</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O que faz</h4>
+            <p>Fecha o canal quando o som está abaixo de um nível e abre quando passa dele. Na bateria, serve para o microfone do tom captar só o tom, e não o resto da bateria vazando o tempo todo.</p>
+          </div>
+          <div>
+            <h4>Os controles</h4>
+            <ul>
+              <li><strong>Threshold:</strong> o nível que o som precisa passar para o gate abrir.</li>
+              <li><strong>Range:</strong> quanto o canal abaixa quando está fechado. Não precisa ser silêncio total.</li>
+              <li><strong>Attack:</strong> a rapidez com que abre. Em bateria, rápido, para não comer o ataque da batida.</li>
+              <li><strong>Hold e release:</strong> quanto tempo fica aberto e a rapidez com que fecha. Curto demais corta a ressonância do tambor.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Onde faz sentido</h4>
+            <p>Bumbo, snare, tom e surdo. Em overs e hi-hat normalmente não, e em voz de quem fala quase nunca.</p>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Instrumento que some, falha ou parece cortado no meio da nota: desconfie do gate. O threshold está alto demais para a força com que o músico está tocando hoje.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="sos-item topic">
+        <summary>Compressão <span class="where">canais e buses 11 e 12</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O que faz</h4>
+            <p>Diminui a diferença entre o som forte e o som fraco. Quando o som passa de um nível, o compressor abaixa o excesso. O resultado é um canal mais estável, que não some nem pula.</p>
+          </div>
+          <div>
+            <h4>Os controles</h4>
+            <ul>
+              <li><strong>Threshold:</strong> a partir de que nível ele começa a agir.</li>
+              <li><strong>Ratio:</strong> com que força abaixa o que passou. 2:1 é suave, 4:1 é firme, acima de 10:1 já é um limitador.</li>
+              <li><strong>Attack:</strong> a rapidez com que começa a agir. Lento deixa passar a batida inicial, rápido segura tudo.</li>
+              <li><strong>Release:</strong> a rapidez com que solta.</li>
+              <li><strong>Gain (makeup):</strong> devolve o volume perdido na compressão.</li>
+              <li><strong>Medidor de redução (GR):</strong> mostra quanto está sendo abaixado. É por ele que você sabe se está comprimindo pouco ou demais.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Ponto de partida</h4>
+            <p>Em voz, ratio perto de 3:1 e de 3 a 6 dB de redução nas partes fortes. Se o medidor de redução não volta a zero nas pausas, está comprimindo demais.</p>
+          </div>
+          <div>
+            <h4>Na cena BASE A</h4>
+            <ul>
+              <li><strong>Bus 11, Bateria LR:</strong> a bateria toda passa por uma compressão leve, que faz as peças soarem como um instrumento só.</li>
+              <li><strong>Bus 12, compressão paralela:</strong> uma cópia da bateria comprimida com força, somada ao som normal. Dá corpo e sustentação sem tirar o impacto das batidas.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Compressão com makeup alto sobe tudo que é fraco, inclusive o vazamento do palco. Em microfone de voz, isso aproxima a microfonia.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="sos-item topic">
+        <summary>Reverb e delay <span class="where">buses 13 a 16</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>Como funcionam aqui</h4>
+            <p>Os efeitos ficam em buses. Cada canal manda um pouco do seu som para o bus do efeito, e o efeito volta somado à mixagem. A quantidade de efeito de um canal é o envio dele para esse bus.</p>
+          </div>
+          <div>
+            <h4>Os quatro efeitos da cena</h4>
+            <ul>
+              <li><strong>Bus 13, FX Hall:</strong> reverb de sala grande. Dá espaço e profundidade.</li>
+              <li><strong>Bus 14, FX Bateria Hall:</strong> reverb separado para a bateria, para ajustar sem afetar as vozes.</li>
+              <li><strong>Bus 15, FX Reverb TC:</strong> segundo reverb, com outro timbre.</li>
+              <li><strong>Bus 16, FX Delay:</strong> repetições do som (eco). Preenche os espaços entre as frases.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Como usar</h4>
+            <ul>
+              <li>Efeito bom é o que você só percebe quando tira. Se dá para ouvir claramente o reverb, provavelmente está demais.</li>
+              <li>Música lenta aguenta mais reverb. Música rápida com muito reverb vira uma massa confusa.</li>
+              <li>O delay precisa estar no andamento da música, senão atrapalha em vez de ajudar.</li>
+              <li>Quando alguém vai falar, e não cantar, tire o efeito daquele microfone. Fala com reverb e delay fica difícil de entender.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>O salão já tem reverberação própria, a transmissão não. O mesmo efeito soa discreto no salão e bem mais evidente na live.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="sos-item topic">
+        <summary>Mastering <span class="where">transmissão</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O que é</h4>
+            <p>Plugin nativo da Wing que junta, em um só efeito, quatro processadores usados para dar acabamento a uma mixagem pronta. Na nossa cena ele é a última etapa do som que vai para a transmissão.</p>
+          </div>
+          <div>
+            <h4>Os quatro blocos</h4>
+            <ol class="chain">
+              <li><span><strong>Saturação de fita</strong><small>Imita um gravador de fita. Arredonda os picos e dá uma sensação de som mais cheio e quente.</small></span></li>
+              <li><span><strong>Equalizador</strong><small>Ajuste fino do timbre geral, com curvas suaves. Não é para consertar um canal ruim.</small></span></li>
+              <li><span><strong>Exciter e imagem estéreo</strong><small>Realça brilho e clareza e controla o quanto o som parece aberto entre os lados.</small></span></li>
+              <li><span><strong>Limiter</strong><small>Impede que o som passe de um teto. Tem threshold, release e modo RMS ou Peak.</small></span></li>
+            </ol>
+          </div>
+          <div>
+            <h4>Por que usar na transmissão</h4>
+            <p>Quem assiste em casa ouve em celular, TV ou fone, sem a acústica do salão. O Mastering deixa o volume da live constante e segura os picos, para o áudio não distorcer nem ficar baixo perto de outros vídeos.</p>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Se a live soa esmagada, sem dinâmica ou com o volume subindo e descendo sozinho, o limiter está trabalhando demais. A causa quase sempre é nível alto chegando nele. Resolva na mixagem, não no plugin.</p>
+          </div>
+        </div>
+      </details>
+
+      <details class="sos-item topic">
+        <summary>Combinator <span class="where">P.A. e transmissão</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O que é</h4>
+            <p>Compressor multibanda. Ele divide o som em cinco faixas de frequência, do grave ao agudo, e comprime cada uma separadamente.</p>
+          </div>
+          <div>
+            <h4>Qual é a vantagem</h4>
+            <p>Num compressor comum, um bumbo forte abaixa a mixagem inteira, voz incluída. No Combinator, o bumbo só aciona a compressão dos graves, e as vozes continuam onde estavam. O som fica controlado e equilibrado sem parecer comprimido.</p>
+          </div>
+          <div>
+            <h4>O que observar</h4>
+            <ul>
+              <li>Cada faixa tem seu medidor de redução. O normal é todos trabalharem um pouco, nas partes fortes.</li>
+              <li>Uma faixa reduzindo muito o tempo todo indica sobra naquela região. Se forem os graves, há grave demais na mixagem.</li>
+              <li>Como ele segura o volume, subir os faders contra ele não deixa o som mais alto. Só aumenta a compressão.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Ele está no som do salão e no da transmissão. Qualquer ajuste nele muda os dois ao mesmo tempo, então trate o que ele mostra como aviso sobre a mixagem e corrija nos canais.</p>
+          </div>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <section class="view" id="v-checklists" hidden>
+    <div class="group">
+      <h2>Checklists do culto</h2>
+      <p class="lead">As marcações ficam salvas neste aparelho. Zere no começo de cada culto.</p>
+    </div>
+    <div id="checks" class="view"></div>
+    <button class="btn" id="zerar" type="button">Zerar marcações</button>
+  </section>
+
+  <section class="view" id="v-regras" hidden>
+    <div class="group">
+      <h2>O que mexer e o que deixar quieto</h2>
+      <p class="lead">Na dúvida, não mexa e pergunte. Um ajuste errado no lugar errado muda o som do salão e o fone de todo mundo ao mesmo tempo.</p>
+    </div>
+    <div id="regras" class="view"></div>
+    <p class="note">Rascunho inicial, montado a partir da cena BASE A e de boas práticas gerais. Revise com o que vale na sua igreja.</p>
+  </section>
+</main>
+</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var CORES = { preto: '#1c1c20', branco: '#f5f5f0', verde: '#2fa35a', vermelho: '#d9423a', azul: '#2f72d9', amarelo: '#e8c22e', roxo: '#9b6bff', ciano: '#2ec8d8', rosa: '#ff5fb4' };
+  /* Símbolos dos canais: desenhos de linha 24x24, pintados com a cor do canal. */
+  var ICONES = {
+    bumbo: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>',
+    caixa: '<ellipse cx="12" cy="10" rx="8" ry="2.8"/><path d="M4 10v6c0 1.6 3.6 2.8 8 2.8s8-1.2 8-2.8v-6"/><path d="M7 3.5l3.5 5M17 3.5l-3.5 5"/>',
+    tom: '<ellipse cx="12" cy="7" rx="7" ry="2.5"/><path d="M5 7v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V7"/><path d="M12 15.5V22"/>',
+    surdo: '<ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v11c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-11"/><path d="M6.5 18.5 5 22M17.5 18.5 19 22"/>',
+    hihat: '<path d="M3 8.5q9-4 18 0"/><path d="M3 10.5q9 4 18 0"/><path d="M12 4v17M8.5 21h7"/>',
+    prato: '<path d="M2.5 9.5q9.5-5 19 0"/><path d="M12 7v14M8.5 21h7M12 4.5v2.5"/>',
+    baixo: '<circle cx="7" cy="17" r="4.2"/><path d="M8 18l-2-2M10 14 20.5 3.5"/><path d="M17.5 3.5l1 1M19.5 5.5l1 1M19 2.5l1 1M21 4.5l1 1"/>',
+    cello: '<path d="M12 2v5.5"/><path d="M9.2 7.5h5.6c1 1.6.2 3.1-1 3.7 1.8.8 2.9 2.5 2.9 4.5a4.7 4.7 0 0 1-9.4 0c0-2 1.1-3.7 2.9-4.5-1.2-.6-2-2.1-1-3.7z"/><path d="M12 20.5V22M10.8 15h2.4"/>',
+    violao: '<circle cx="8.5" cy="15.5" r="5.5"/><circle cx="8.5" cy="15.5" r="1.6"/><path d="M12.5 11.5 20 4"/><path d="M18.5 2.5l3 3"/>',
+    guitarra: '<path d="M10.2 13.8c.9 2.6-.4 5.4-2.7 6.5-2.2 1-4.1-.6-4.4-2.6-.2-1.6.8-2.3 1.7-2.8-1-.8-1.2-2.4-.1-3.3 1.2-1 2.8-.6 3.6.4l1.9-1.6z"/><path d="M10.2 13.8 20.5 3.5"/><path d="M18.5 2.5l3 3M5.8 17.2l2 2"/>',
+    teclado: '<rect x="2" y="6.5" width="20" height="11" rx="1.5"/><path d="M2 13h20M6 13v4.5M10 13v4.5M14 13v4.5M18 13v4.5"/><path d="M7.5 6.5V13M12 6.5V13M16.5 6.5V13" stroke-width="2.6"/>',
+    vs: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M10 9v6l5-3z" fill="currentColor"/>',
+    mic: '<rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21.5M8.5 21.5h7"/>',
+    fone: '<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/>',
+    chao: '<path d="M3 19.5h18l-3-12-15 5z"/><circle cx="10" cy="14.5" r="2.3"/><path d="M14.5 11.3l2.3-.7"/>',
+    kit: '<ellipse cx="12" cy="13" rx="6.5" ry="2.3"/><path d="M5.5 13v4.5c0 1.3 2.9 2.3 6.5 2.3s6.5-1 6.5-2.3V13"/><path d="M2 6.5q5-3 10 0M7 5.3V9.5M14 6.5q4-2.4 8 0M18 5.5V9.5"/>',
+    comp: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M6.5 17.5l6-6 5-2"/><path d="M12.5 11.5l5-5" stroke-dasharray="1.5 2"/>',
+    fx: '<path d="M12 3v3.5M12 17.5V21M3 12h3.5M17.5 12H21M5.6 5.6l2.5 2.5M15.9 15.9l2.5 2.5M5.6 18.4l2.5-2.5M15.9 8.1l2.5-2.5"/><circle cx="12" cy="12" r="2.4"/>',
+    delay: '<path d="M4 5v14"/><path d="M9.3 7.5v9" opacity=".75"/><path d="M14.6 9.5v5" opacity=".5"/><path d="M20 11v2" opacity=".3"/>'
+  };
+  function icone(c) {
+    var box = el('span', { class: 'ico' + (c.cor === 'preto' ? ' inv' : ''), 'aria-hidden': 'true' });
+    if (c.cor && CORES[c.cor]) box.style.setProperty('--c', CORES[c.cor]);
+    if (c.icone && ICONES[c.icone]) box.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICONES[c.icone] + '</svg>';
+    return box;
+  }
+  var VIEWS = ['emergencia', 'mesa', 'canais', 'buses', 'processamento', 'eq', 'checklists', 'regras'];
+  var cena = null;
+
+  function el(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === 'text') e.textContent = attrs[k];
+      else if (k === 'class') e.className = attrs[k];
+      else e.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (k) { if (k) e.appendChild(k); });
+    return e;
+  }
+  function dot(cor) {
+    var d = el('span', { class: 'dot' + (cor ? '' : ' none') });
+    if (cor && CORES[cor]) d.style.background = CORES[cor];
+    return d;
+  }
+  function steps(list) {
+    return el('ol', { class: 'steps' }, list.map(function (t) { return el('li', null, [el('span', { text: t })]); }));
+  }
+  function todosCanais() {
+    var out = [];
+    cena.paginas.forEach(function (p) { (p.canais || []).forEach(function (c) { out.push(c); }); });
+    return out;
+  }
+  function faixa(lista) {
+    if (!lista.length) return '';
+    var a = lista[0].n, b = lista[lista.length - 1].n;
+    return a === b ? String(a) : a + ' a ' + b;
+  }
+
+  /* ---------- Navegação ---------- */
+  function mostrar() {
+    var h = location.hash.replace('#', '');
+    if (VIEWS.indexOf(h) < 0) h = 'emergencia';
+    VIEWS.forEach(function (v) { document.getElementById('v-' + v).hidden = v !== h; });
+    document.querySelectorAll('.tabs a').forEach(function (a) {
+      if (a.getAttribute('href') === '#' + h) {
+        a.setAttribute('aria-current', 'page');
+        var atual = document.getElementById('atual');
+        atual.textContent = a.textContent;
+        var simbolo = a.querySelector('.mi');
+        if (simbolo) atual.insertBefore(simbolo.cloneNode(true), atual.firstChild);
+        atual.classList.toggle('sos', a.classList.contains('sos'));
+      } else a.removeAttribute('aria-current');
+    });
+    menu(false);
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', mostrar);
+
+  /* Menu lateral: fixo em telas largas, gaveta no celular. */
+  function menu(abrir) {
+    document.body.classList.toggle('menu-aberto', abrir);
+    document.getElementById('btn-menu').setAttribute('aria-expanded', abrir ? 'true' : 'false');
+  }
+  document.getElementById('btn-menu').addEventListener('click', function () { menu(!document.body.classList.contains('menu-aberto')); });
+  document.getElementById('veu').addEventListener('click', function () { menu(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') menu(false); });
+
+  /* ---------- Emergência ---------- */
+  function renderEmergencia() {
+    var canais = todosCanais();
+    var vozes = canais.filter(function (c) { return c.grupo === 'Vozes'; });
+    var chao = cena.buses.filter(function (b) { return b.chao; })[0];
+    var mutado = canais.filter(function (c) { return c.sempreMutado; })[0];
+    var retornos = cena.buses.filter(function (b) { return b.tipo === 'retorno'; });
+    var txtChao = chao ? 'o bus ' + chao.n + ' (' + chao.nome.toLowerCase() + ')' : 'o bus do retorno de chão';
+
+    var itens = [
+      { t: 'Deu microfonia', p: [
+        'Baixe o fader do último canal que você subiu. Na dúvida, baixe os microfones de voz (canais ' + faixa(vozes) + '), um de cada vez.',
+        'Olhe os medidores. O canal que está apitando fica com o nível alto e parado, mesmo sem ninguém falar.',
+        'Mute os microfones que ninguém está usando agora.',
+        'Se o apito vem do palco, é o retorno de chão. Baixe o envio desse microfone para ' + txtChao + '.',
+        'Peça para a pessoa não apontar o microfone para a caixa e não cobrir a cabeça do microfone com a mão.',
+        'Deixe o EQ para depois que o apito parar.'
+      ] },
+      { t: 'Microfone não sai', p: [
+        'Veja a cor do microfone e ache o canal dele na aba Canais.',
+        'Olhe o medidor desse canal enquanto a pessoa fala.',
+        'O medidor mexe: o som chega na mesa. Confira o mute do canal, o fader do canal e se algum grupo de mute ou DCA está segurando.',
+        'O medidor não mexe: o problema é antes da mesa. Microfone ligado? Bateria carregada? Cabo bem encaixado?',
+        'Não resolveu rápido: entregue outro microfone que você sabe que está funcionando e resolva depois.'
+      ] },
+      { t: 'Músico sem retorno', retorno: true },
+      { t: 'Som distorcendo', p: [
+        'Descubra se é um canal só ou se é tudo. Os medidores mostram quem está no vermelho.',
+        'Um canal só, com o medidor no vermelho: baixe o ganho desse canal aos poucos. Isso também baixa esse canal no fone de todo mundo.',
+        'Medidor normal e continua distorcendo: o problema está na fonte (instrumento, pedal, cabo ou microfone). Avise o músico.',
+        'Tudo distorcendo e o main no vermelho: baixe o main um pouco.'
+      ] },
+      { t: 'Ficou tudo mudo', p: [
+        'Os medidores dos canais mexem? Se sim, o som está chegando na mesa.',
+        'Veja se o main está mutado ou com o fader embaixo.',
+        'Veja se algum grupo de mute foi acionado sem querer.',
+        'O medidor do main mexe e mesmo assim não sai som: o problema é depois da mesa. Chame o responsável.'
+      ] },
+      { t: 'Carreguei a cena errada', p: [
+        'Baixe o main antes de qualquer coisa, para ninguém levar um susto.',
+        'Recarregue a cena ' + cena.cena + '.',
+        'Recarregar desfaz os ajustes feitos depois que a cena foi salva. Refaça só o essencial: os volumes principais e os microfones em uso.',
+        mutado ? 'Confira se o ' + mutado.nome.toLowerCase() + ' (canal ' + mutado.n + ') continua mutado.' : 'Confira os mutes.',
+        'Suba o main de volta aos poucos.'
+      ] }
+    ];
+
+    var box = document.getElementById('sos');
+    box.textContent = '';
+    itens.forEach(function (it) {
+      var body = el('div', { class: 'sos-body' });
+      if (it.retorno) {
+        var alvo = el('div');
+        var pick = el('div', { class: 'pick', role: 'group', 'aria-label': 'Quem está sem retorno' });
+        retornos.forEach(function (b) {
+          var btn = el('button', { type: 'button', 'aria-pressed': 'false' }, [b.cor ? dot(b.cor) : null, el('span', { text: b.para })]);
+          btn.addEventListener('click', function () {
+            pick.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+            btn.setAttribute('aria-pressed', 'true');
+            alvo.textContent = '';
+            alvo.appendChild(steps([
+              'Selecione o bus ' + b.n + ' (' + b.nome + ') na mesa.',
+              'Veja se o bus está mutado e se o fader dele está em cima.',
+              'Aperte SENDS ON FADER. Os faders dos canais passam a mostrar o que vai para o bus ' + b.n + '.',
+              'Suba aos poucos o fader do canal que a pessoa quer ouvir e pergunte se melhorou.',
+              'Aperte SENDS ON FADER de novo para sair.',
+              b.chao
+                ? 'O medidor do bus mexe e não sai som no palco: o problema é na caixa de retorno ou no cabo dela.'
+                : 'O medidor do bus mexe e a pessoa não ouve: o problema é no fone, no cabo ou no aparelho dela.'
+            ]));
+          });
+          pick.appendChild(btn);
+        });
+        body.appendChild(el('p', { class: 'pick-label', text: 'Quem está sem retorno?' }));
+        body.appendChild(pick);
+        body.appendChild(alvo);
+      } else {
+        body.appendChild(steps(it.p));
+      }
+      box.appendChild(el('details', { class: 'sos-item' }, [el('summary', { text: it.t }), body]));
+    });
+  }
+
+  /* ---------- Canais ---------- */
+  function renderCanais(filtro) {
+    var f = (filtro || '').trim().toLowerCase();
+    var box = document.getElementById('canais');
+    box.textContent = '';
+    var achou = 0;
+    cena.paginas.forEach(function (p) {
+      if (p.pendente) {
+        if (!f) box.appendChild(el('div', { class: 'group' }, [
+          el('div', { class: 'group-head' }, [el('h3', { text: p.nome })]),
+          el('div', { class: 'pending', text: p.pendente })
+        ]));
+        return;
+      }
+      var lista = p.canais.filter(function (c) {
+        if (!f) return true;
+        return [c.n, c.nome, c.grupo, c.cor, c.quem].join(' ').toLowerCase().indexOf(f) >= 0;
+      });
+      if (!lista.length) return;
+      achou += lista.length;
+      var rows = el('div', { class: 'rows' });
+      lista.forEach(function (c) {
+        var nome = el('div', { class: 'name' }, [document.createTextNode(c.nome)]);
+        if (c.nota) nome.appendChild(el('small', { text: c.nota }));
+        var tag = null;
+        if (c.sempreMutado) tag = el('span', { class: 'tag mute', text: 'Sempre mutado' });
+        else if (c.quem) tag = el('span', { class: 'tag who', text: c.quem });
+        else if (c.vazio) tag = el('span', { class: 'tag empty', text: 'Livre' });
+        if (c.cor && c.nome.toLowerCase().indexOf(c.cor) < 0) nome.appendChild(el('small', { class: 'cor', text: c.cor.charAt(0).toUpperCase() + c.cor.slice(1) }));
+        rows.appendChild(el('div', { class: 'row ch' + (c.vazio || c.sempreMutado ? ' dim' : '') }, [
+          el('span', { class: 'n', text: String(c.n) }), icone(c), nome, tag || el('span')
+        ]));
+      });
+      box.appendChild(el('div', { class: 'group' }, [
+        el('div', { class: 'group-head' }, [el('h3', { text: p.nome }), el('span', { text: 'canais ' + faixa(p.canais) })]),
+        rows
+      ]));
+    });
+    if (f && !achou) box.appendChild(el('p', { class: 'empty-msg', text: 'Nenhum canal com "' + filtro + '". As páginas 3 e 4 ainda não foram levantadas.' }));
+  }
+
+  /* ---------- DCAs ---------- */
+  function renderDcas() {
+    var box = document.getElementById('dca-lista');
+    box.textContent = '';
+    (cena.dcas || []).forEach(function (d, i) {
+      box.appendChild(el('div', { class: 'row' }, [
+        el('span', { class: 'n', text: String(i + 1) }), dot(null),
+        el('div', { class: 'name' }, [document.createTextNode(d.nome), el('small', { text: d.conteudo })]),
+        el('span', { class: 'tag who', text: (/^\d+$/.test(d.canais) ? 'Canal ' : 'Canais ') + d.canais })
+      ]));
+    });
+    document.getElementById('dca-nota').textContent = cena.dcasNota || '';
+  }
+
+  /* ---------- Buses ---------- */
+  function renderBuses() {
+    var grupos = [
+      { tipo: 'retorno', t: 'Retornos', d: 'O que cada pessoa ouve. É aqui que você mexe quando alguém pede mais ou menos de alguma coisa no fone ou no chão.' },
+      { tipo: 'grupo', t: 'Grupo da bateria', d: 'Não são retornos. Fazem parte do som da bateria no salão: baixar ou mutar um deles muda a bateria inteira.' },
+      { tipo: 'efeito', t: 'Efeitos', d: 'Os canais mandam um pouco de som para cá e o efeito volta somado à mixagem.' }
+    ];
+    var box = document.getElementById('buses');
+    box.textContent = '';
+    grupos.forEach(function (g) {
+      var lista = cena.buses.filter(function (b) { return b.tipo === g.tipo; });
+      if (!lista.length) return;
+      var rows = el('div', { class: 'rows' });
+      lista.forEach(function (b) {
+        var nome = el('div', { class: 'name' }, [document.createTextNode(b.nome)]);
+        if (b.nota) nome.appendChild(el('small', { text: b.nota }));
+        if (b.cor) nome.appendChild(el('small', { class: 'cor', text: b.cor.charAt(0).toUpperCase() + b.cor.slice(1) }));
+        rows.appendChild(el('div', { class: 'row ch' }, [el('span', { class: 'n', text: String(b.n) }), icone(b), nome, el('span')]));
+      });
+      box.appendChild(el('div', { class: 'group' }, [
+        el('div', { class: 'group-head' }, [el('h3', { text: g.t }), el('span', { text: lista.length + (lista.length === 1 ? ' bus' : ' buses') })]),
+        el('p', { class: 'lead', text: g.d }),
+        rows
+      ]));
+    });
+  }
+
+  /* ---------- Checklists ---------- */
+  var CHAVE = 'guia-mesa-checks-v2';
+  function lerMarcas() { try { return JSON.parse(localStorage.getItem(CHAVE)) || {}; } catch (e) { return {}; } }
+  function salvarMarcas(m) { try { localStorage.setItem(CHAVE, JSON.stringify(m)); } catch (e) {} }
+
+  /* Cada item é um texto ou [texto, explicação]. Listas com "partes" mostram onde fazer. */
+  function renderChecks() {
+    var listas = [
+      { id: 'antes', t: 'Antes da passagem', partes: [
+        { onde: 'Na baia de áudio', i: [
+          'Ligar o rack de energia da baia de áudio',
+          'Ligar a mesa de som',
+          ['Ligar o disjuntor "Som"', 'São as caixas.'],
+          ['Carregar a cena ' + cena.cena, 'Caso não esteja nela, ou se quiser resetar a cena.']
+        ] },
+        { onde: 'No fundo do palco', i: [
+          'Ligar as tomadas do palco pelo disjuntor da parede',
+          'Ligar o rack',
+          'Ligar os microfones',
+          ['Trocar as pilhas', 'Se necessário.'],
+          'Testar o sinal de todos os microfones'
+        ] }
+      ] },
+      { id: 'passagem', t: 'Passagem de som', i: [
+        ['Fazer a estrutura de ganho de cada canal de entrada', '', true],
+        ['Bateria, peça por peça', 'A bateria é a base da mix.'],
+        'Outros instrumentos',
+        'Vozes, uma de cada vez',
+        'Perguntar se os músicos precisam de algo no palco ou no retorno',
+        'Fazer a mix enquanto o ensaio acontece',
+        ['Trocar as pilhas para o culto', 'Se necessário.']
+      ] },
+      { id: 'durante', t: 'Durante o culto', i: [
+        'Olhar os medidores de entradas e saídas',
+        ['Olhar o sinal de saída da transmissão no NDI', 'Manter sempre em -14 LUFS.'],
+        ['Ouvir o canal da equipe', 'Os músicos podem precisar do operador de som a qualquer momento.'],
+        'Atenção aos microfones dos pastores'
+      ] },
+      { id: 'depois', t: 'Depois do culto', i: [
+        'Recolher e guardar os microfones',
+        'Arrumar os fios do palco',
+        'Desligar o rack do palco',
+        'Desligar as caixas pelo disjuntor',
+        'Desligar a mesa de som',
+        'Desligar o rack da baia de áudio'
+      ] }
+    ];
+    var marcas = lerMarcas();
+    var box = document.getElementById('checks');
+    box.textContent = '';
+    function linhas(itens, prefixo) {
+      var rows = el('div', { class: 'rows' });
+      itens.forEach(function (item, idx) {
+        var texto = Array.isArray(item) ? item[0] : item;
+        var id = prefixo + '-' + idx;
+        var input = el('input', { type: 'checkbox', id: id });
+        input.checked = !!marcas[id];
+        input.addEventListener('change', function () {
+          var m = lerMarcas();
+          if (input.checked) m[id] = 1; else delete m[id];
+          salvarMarcas(m);
+        });
+        var txt = el('span', { text: texto });
+        if (Array.isArray(item) && item[1]) txt.appendChild(el('small', { text: item[1] }));
+        var importante = Array.isArray(item) && item[2];
+        rows.appendChild(el('label', { class: 'check' + (importante ? ' importante' : ''), for: id }, [
+          input, txt, importante ? el('span', { class: 'tag imp', text: 'Importante' }) : null
+        ]));
+      });
+      return rows;
+    }
+    listas.forEach(function (l) {
+      var filhos = [el('h3', { text: l.t })];
+      if (l.partes) l.partes.forEach(function (p, k) {
+        filhos.push(el('h4', { class: 'onde', text: p.onde }), linhas(p.i, 'ck-' + l.id + '-' + k));
+      });
+      else filhos.push(linhas(l.i, 'ck-' + l.id));
+      box.appendChild(el('div', { class: 'group' }, filhos));
+    });
+  }
+  document.getElementById('zerar').addEventListener('click', function () { salvarMarcas({}); renderChecks(); });
+
+  /* ---------- Regras ---------- */
+  function renderRegras() {
+    var canais = todosCanais();
+    var mutado = canais.filter(function (c) { return c.sempreMutado; })[0];
+    var ret = cena.buses.filter(function (b) { return b.tipo === 'retorno'; });
+    var grp = cena.buses.filter(function (b) { return b.tipo === 'grupo'; });
+    var blocos = [
+      { c: 'ok', t: 'Pode mexer', i: [
+        ['Faders dos canais', 'É a sua ferramenta principal durante o culto.'],
+        ['Mute dos canais', 'Feche o que não está em uso e abra antes de a pessoa precisar.'],
+        ['Envios de retorno (buses ' + faixa(ret) + ')', 'Quando o músico pedir. Mude aos poucos e pergunte se melhorou.']
+      ] },
+      { c: 'warn', t: 'Com critério', i: [
+        ['EQ', 'Ajustes pequenos e por um motivo que você consegue explicar. Não durante uma emergência.'],
+        ['Compressor', 'Se você não sabe o que cada controle faz, deixe como está.'],
+        ['Ganho', 'Muda o canal no salão e em todos os fones ao mesmo tempo. Só se estiver distorcendo ou fraco demais.']
+      ] },
+      { c: 'stop', t: 'Não mexe', i: [
+        ['Salvar por cima da ' + cena.cena, 'Ela é o ponto de partida de todo mundo. Um salvamento errado estraga o próximo culto.'],
+        mutado ? [mutado.nome + ' (canal ' + mutado.n + ')', 'Fica sempre mutado. Não é defeito.'] : null,
+        grp.length ? ['Buses ' + faixa(grp) + ' da bateria', 'A compressão deles já está ajustada. Mexer muda o som da bateria inteira.'] : null,
+        ['Mastering e Combinator', 'Processam o som inteiro do salão e da transmissão. Um ajuste errado aparece em tudo ao mesmo tempo.'],
+        ['Roteamento e configuração de entradas e saídas', 'Um toque errado aqui some com o som de um canal ou do salão inteiro.'],
+        ['Nome e ordem dos canais', 'Todo mundo conta com eles no lugar de sempre.']
+      ] }
+    ];
+    var box = document.getElementById('regras');
+    box.textContent = '';
+    blocos.forEach(function (b) {
+      var ul = el('ul');
+      b.i.filter(Boolean).forEach(function (it) {
+        ul.appendChild(el('li', null, [el('strong', { text: it[0] }), el('small', { text: it[1] })]));
+      });
+      box.appendChild(el('div', { class: 'rule ' + b.c }, [el('h3', { text: b.t }), ul]));
+    });
+  }
+
+  /* ---------- Estado da mesa ---------- */
+  function verMesa() {
+    fetch('/api/mesa').then(function (r) { return r.json(); }).then(function (m) {
+      var box = document.getElementById('mesa');
+      box.className = 'mesa' + (m.conectada ? ' on' : '');
+      box.title = m.motivo || '';
+      document.getElementById('mesa-txt').textContent = m.conectada ? 'Mesa conectada' : 'Mesa não conectada';
+    }).catch(function () {
+      document.getElementById('mesa-txt').textContent = 'Mesa: só na rede da igreja';
+    });
+  }
+
+  /* ---------- Início ---------- */
+  /* No computador da igreja a cena vem do servidor. Na versão publicada, vem do arquivo ao lado da página. */
+  function json(url) { return fetch(url).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); }); }
+  mostrar();
+  json('/api/cena').catch(function () { return json('dados/cena-base-a.json'); }).then(function (dados) {
+    if (dados.erro) throw new Error(dados.erro);
+    cena = dados;
+    document.getElementById('cena').textContent = cena.cena;
+    renderEmergencia(); renderCanais(''); renderDcas(); renderBuses(); renderChecks(); renderRegras();
+    document.getElementById('busca').addEventListener('input', function (e) { renderCanais(e.target.value); });
+  }).catch(function (e) {
+    var box = document.getElementById('erro');
+    box.hidden = false;
+    box.textContent = 'Não consegui carregar a cena. O guia precisa ser aberto pelo iniciar.bat. Detalhe: ' + e.message;
+  });
+  verMesa();
+})();
+</script>
+<script src="mesa.js"></script>
+<script src="eq.js"></script>
+</body>
+</html>

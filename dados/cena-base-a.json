@@ -1,0 +1,105 @@
+{
+  "mesa": "Behringer Wing",
+  "cena": "BASE A",
+  "paginas": [
+    {
+      "nome": "Página 1",
+      "canais": [
+        { "n": 1, "nome": "Bumbo out", "grupo": "Bateria", "cor": "verde", "icone": "bumbo" },
+        { "n": 2, "nome": "Bumbo in", "grupo": "Bateria", "sempreMutado": true, "nota": "Não é usado. Fica sempre mutado.", "cor": "verde", "icone": "bumbo" },
+        { "n": 3, "nome": "Snare top", "grupo": "Bateria", "cor": "verde", "icone": "caixa" },
+        { "n": 4, "nome": "Snare bottom", "grupo": "Bateria", "cor": "verde", "icone": "caixa" },
+        { "n": 5, "nome": "Tom", "grupo": "Bateria", "cor": "verde", "icone": "tom" },
+        { "n": 6, "nome": "Surdo", "grupo": "Bateria", "cor": "verde", "icone": "surdo" },
+        { "n": 7, "nome": "Hi-hat", "grupo": "Bateria", "cor": "verde", "icone": "hihat" },
+        { "n": 8, "nome": "Over left", "grupo": "Bateria", "cor": "verde", "icone": "prato" },
+        { "n": 9, "nome": "Over right", "grupo": "Bateria", "cor": "verde", "icone": "prato" },
+        { "n": 10, "nome": "Baixo", "grupo": "Banda", "cor": "vermelho", "icone": "baixo" },
+        { "n": 11, "nome": "Cello", "grupo": "Banda", "cor": "roxo", "icone": "cello" },
+        { "n": 12, "nome": "Violão", "grupo": "Banda", "cor": "ciano", "icone": "violao" }
+      ]
+    },
+    {
+      "nome": "Página 2",
+      "canais": [
+        { "n": 13, "nome": "Guitarra 1", "grupo": "Banda", "cor": "amarelo", "icone": "guitarra" },
+        { "n": 14, "nome": "Guitarra 2", "grupo": "Banda", "cor": "amarelo", "icone": "guitarra" },
+        { "n": 15, "nome": "Teclado 1", "grupo": "Banda", "cor": "roxo", "icone": "teclado" },
+        { "n": 16, "nome": "Teclado 2", "grupo": "Banda", "cor": "roxo", "icone": "teclado" },
+        { "n": 17, "nome": "VS", "grupo": "Banda", "cor": "rosa", "icone": "vs" },
+        { "n": 18, "nome": "(vazio)", "grupo": "Banda", "vazio": true },
+        { "n": 19, "nome": "Microfone preto", "grupo": "Vozes", "cor": "preto", "quem": "Pastor 2", "icone": "mic" },
+        { "n": 20, "nome": "Microfone branco", "grupo": "Vozes", "cor": "branco", "quem": "Pastor 1", "icone": "mic" },
+        { "n": 21, "nome": "Microfone verde", "grupo": "Vozes", "cor": "verde", "quem": "Vocal", "icone": "mic" },
+        { "n": 22, "nome": "Microfone vermelho", "grupo": "Vozes", "cor": "vermelho", "quem": "Lead", "icone": "mic" },
+        { "n": 23, "nome": "Microfone azul", "grupo": "Vozes", "cor": "azul", "quem": "Vocal", "icone": "mic" },
+        { "n": 24, "nome": "Microfone amarelo", "grupo": "Vozes", "cor": "amarelo", "quem": "Vocal", "icone": "mic" }
+      ]
+    },
+    {
+      "nome": "Páginas 3 e 4",
+      "pendente": "Falta levantar: DMs, PC, projeção e os demais canais."
+    }
+  ],
+  "dcasNota": "Nomes confirmados. Os canais de cada DCA foram deduzidos pelos nomes e precisam ser conferidos na mesa.",
+  "dcas": [
+    {
+      "nome": "Bateria",
+      "canais": "1 a 9",
+      "conteudo": "Bumbo, caixa, tons, hi-hat e overs"
+    },
+    {
+      "nome": "Cordas",
+      "canais": "10 a 12",
+      "conteudo": "Baixo, cello e violão"
+    },
+    {
+      "nome": "Guitarras",
+      "canais": "13 e 14",
+      "conteudo": "Guitarra 1 e 2"
+    },
+    {
+      "nome": "Teclados",
+      "canais": "15 e 16",
+      "conteudo": "Teclado 1 e 2"
+    },
+    {
+      "nome": "VS",
+      "canais": "17",
+      "conteudo": "Playback"
+    },
+    {
+      "nome": "Vocais",
+      "canais": "21, 23 e 24",
+      "conteudo": "Mics verde, azul e amarelo"
+    },
+    {
+      "nome": "Lead",
+      "canais": "22",
+      "conteudo": "Mic vermelho"
+    },
+    {
+      "nome": "Banda",
+      "canais": "1 a 17",
+      "conteudo": "Todos os instrumentos e o VS"
+    }
+  ],
+  "buses": [
+    { "n": 1, "nome": "Fone do baixo", "tipo": "retorno", "para": "Baixo", "cor": "vermelho", "icone": "fone" },
+    { "n": 2, "nome": "Fone da bateria", "tipo": "retorno", "para": "Bateria", "cor": "verde", "icone": "fone" },
+    { "n": 3, "nome": "Fone do teclado", "tipo": "retorno", "para": "Teclado", "cor": "roxo", "icone": "fone" },
+    { "n": 4, "nome": "Fone da guitarra", "tipo": "retorno", "para": "Guitarra", "cor": "amarelo", "icone": "fone" },
+    { "n": 5, "nome": "Fone do violão", "tipo": "retorno", "para": "Violão", "cor": "ciano", "icone": "fone" },
+    { "n": 6, "nome": "Fone do mic verde", "tipo": "retorno", "para": "Mic verde", "cor": "verde", "icone": "fone" },
+    { "n": 7, "nome": "Fone do mic vermelho", "tipo": "retorno", "para": "Mic vermelho", "cor": "vermelho", "icone": "fone" },
+    { "n": 8, "nome": "Fone do mic azul", "tipo": "retorno", "para": "Mic azul", "cor": "azul", "icone": "fone" },
+    { "n": 9, "nome": "Retorno de chão", "tipo": "retorno", "para": "Retorno de chão", "chao": true, "cor": "branco", "icone": "chao" },
+    { "n": 10, "nome": "Fone do mic amarelo", "tipo": "retorno", "para": "Mic amarelo", "cor": "amarelo", "icone": "fone" },
+    { "n": 11, "nome": "Bateria LR", "tipo": "grupo", "nota": "Bus pós-fader da bateria, com compressão leve.", "cor": "verde", "icone": "kit" },
+    { "n": 12, "nome": "Compressão paralela da bateria", "tipo": "grupo", "nota": "Bus de grupo com compressão paralela pesada.", "cor": "roxo", "icone": "comp" },
+    { "n": 13, "nome": "FX Hall", "tipo": "efeito", "cor": "roxo", "icone": "fx" },
+    { "n": 14, "nome": "FX Bateria Hall", "tipo": "efeito", "cor": "roxo", "icone": "fx" },
+    { "n": 15, "nome": "FX Reverb TC", "tipo": "efeito", "cor": "roxo", "icone": "fx" },
+    { "n": 16, "nome": "FX Delay", "tipo": "efeito", "cor": "roxo", "icone": "delay" }
+  ]
+}
