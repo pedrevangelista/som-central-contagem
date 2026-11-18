@@ -255,9 +255,13 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
     <a href="#canais"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5v4M8.5 21.5h7"/></svg><span>Canais</span></a>
     <a href="#buses"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.5"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.5"/></svg><span>Buses</span></a>
     <a href="#processamento"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M6.5 17.5l6-6 5-2"/><path d="M12.5 11.5l5-5" stroke-dasharray="1.5 2"/></svg><span>Processamento</span></a>
-    <a href="#eq"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12h19" opacity=".4"/><path d="M2.5 14c3.5 0 3.5-7 7-7s3 10 6.5 10 3.5-5 5.5-5"/></svg><span>EQ</span></a>
+    <a href="#transmissao"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="10" r="2"/><path d="M8.5 13.5a5 5 0 0 1 0-7M15.5 6.5a5 5 0 0 1 0 7M5.6 16.4a9 9 0 0 1 0-12.8M18.4 3.6a9 9 0 0 1 0 12.8M12 12v9"/></svg><span>Transmissão</span></a>
     <a href="#checklists"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 6.5l1.8 1.8 3.2-3.3M3.5 13.5l1.8 1.8 3.2-3.3"/><path d="M11.5 7h9M11.5 14h9M11.5 20h9M4 20h4"/></svg><span>Checklists</span></a>
     <a href="#regras"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><rect x="7.5" y="2" width="9" height="20" rx="3"/><circle cx="12" cy="6.5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="17.5" r="1.8"/></svg><span>O que mexer</span></a>
+    <span class="nav-sep" aria-hidden="true">Laboratórios</span>
+    <a href="#ganho"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 13l3.5-3.5"/><path d="M4 6l1.5 1.5M20 6l-1.5 1.5M12 2.5V4"/></svg><span>Ganho</span></a>
+    <a href="#eq"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12h19" opacity=".4"/><path d="M2.5 14c3.5 0 3.5-7 7-7s3 10 6.5 10 3.5-5 5.5-5"/></svg><span>EQ</span></a>
+    <a href="#dinamica"><svg class="mi" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12h2l1.5-6 2 12 2-9 1.5 6h2l1-3 1 3 1-2 1 2h2.5"/><path d="M2.5 4.5h19M2.5 19.5h19" opacity=".45" stroke-dasharray="2 2"/></svg><span>Compressor e gate</span></a>
   </nav>
   <span class="mesa" id="mesa" title=""><i></i><span id="mesa-txt">Mesa: verificando</span></span>
 </aside>
@@ -294,6 +298,210 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
       <p class="lead">Arraste os pontos da curva, toque um som e ouça o que cada ajuste faz. Tudo aqui é treino: nada muda na mesa.</p>
     </div>
     <div id="eq-app" class="view"></div>
+  </section>
+
+  <section class="view" id="v-ganho" hidden>
+    <div class="group">
+      <h2>Laboratório de ganho</h2>
+      <p class="lead">O ganho é o primeiro ajuste do canal e o mais importante: tudo depois dele depende do nível que entra. Toque um som, mexa no ganho e veja o medidor. Tudo aqui é treino: nada muda na mesa.</p>
+    </div>
+    <div id="ganho-app" class="view"></div>
+    <div class="sos-list">
+      <details class="sos-item topic" open>
+        <summary>Ganho não é volume <span class="where">a ideia</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>Dois botões, dois trabalhos</h4>
+            <ul>
+              <li><strong>Ganho:</strong> ajusta quanto sinal entra na mesa. Ele deixa cada microfone num nível de trabalho bom, longe do estouro e longe do ruído. Ajusta-se uma vez, na passagem de som.</li>
+              <li><strong>Fader:</strong> é o volume daquele canal na mixagem. É com ele que você mixa durante o culto.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>O que o medidor diz</h4>
+            <ul>
+              <li><strong>Picos entre −18 e −6 dB:</strong> no ponto. Sobra folga para o cantor soltar a voz no refrão.</li>
+              <li><strong>Picos acima de −6 dB:</strong> pouca folga. O próximo momento forte vai estourar.</li>
+              <li><strong>CLIP aceso:</strong> o sinal passou de 0 dB e foi cortado. A distorção já entra estragada e nada depois conserta.</li>
+              <li><strong>Picos abaixo de −30 dB:</strong> fraco. O fader precisa ficar lá em cima e o ruído sobe junto.</li>
+            </ul>
+            <p class="note">A faixa de −18 a −6 é uma regra prática usada em mesas digitais, não um número da Wing. Bateria tem pico curto e forte: olhe a marca de pico, não a barra.</p>
+          </div>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Passo a passo na passagem de som <span class="where">canal por canal</span></summary>
+        <div class="sos-body">
+          <ol class="steps">
+            <li><span>Deixe o fader do canal em 0 dB (unity) e o canal em SOLO no seu fone.</span></li>
+            <li><span>Peça para o músico tocar ou cantar no volume mais forte que vai usar no culto. O refrão, não o verso. A virada, não o groove.</span></li>
+            <li><span>Suba o ganho até os picos ficarem entre −18 e −6 dB no medidor do canal.</span></li>
+            <li><span>Peça um trecho fraco e confira se ainda aparece bem no medidor.</span></li>
+            <li><span>Só depois ajuste EQ, gate e compressor. Eles dependem do nível que entra.</span></li>
+            <li><span>Faça a mix com os faders. Se um canal precisa de fader muito alto ou muito baixo para soar certo, volte e corrija o ganho.</span></li>
+          </ol>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Por que não mexer no ganho durante o culto <span class="where">atenção</span></summary>
+        <div class="sos-body">
+          <div>
+            <h4>O ganho muda tudo de uma vez</h4>
+            <ul>
+              <li><strong>Os fones mudam.</strong> Os envios de retorno costumam sair antes do fader, mas depois do ganho. Subir o ganho de uma voz sobe essa voz no fone de todo mundo.</li>
+              <li><strong>Os processadores mudam.</strong> O threshold do gate e do compressor foi ajustado para o nível de antes. Com mais ganho, o compressor aperta mais; com menos, o gate pode começar a cortar.</li>
+              <li><strong>O salão e a live mudam juntos,</strong> porque os dois saem da mesma mix.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Exceção: se um canal estiver estourando (CLIP aceso), abaixe o ganho na hora, um pouco de cada vez. Distorção é pior que qualquer efeito colateral. Para volume, use sempre o fader.</p>
+          </div>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Na Wing <span class="where">tela do canal</span></summary>
+        <div class="sos-body">
+          <ul>
+            <li>O ganho fica na etapa de entrada do canal, junto com o phantom +48V e a inversão de fase. Aperte SELECT no canal e abra a entrada na tela.</li>
+            <li>Os medidores mostram o nível em dB abaixo do máximo (0 dB). O topo vermelho é o clip.</li>
+            <li>Microfones de mão sem fio também têm ganho no receptor. Combine com o responsável antes de mexer lá: o ajuste do receptor muda tudo que vem depois.</li>
+            <li>O laboratório usa a mesma lógica, mas os níveis são simulados e não reproduzem exatamente os números da Wing.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="view" id="v-dinamica" hidden>
+    <div class="group">
+      <h2>Laboratório de compressor e gate</h2>
+      <p class="lead">Escolha um ponto de partida, toque o som e mexa nos controles. A curva mostra o que entra e o que sai, e os medidores mostram quanto está sendo reduzido. Tudo aqui é treino: nada muda na mesa.</p>
+    </div>
+    <div id="dinamica-app" class="view"></div>
+    <div class="sos-list">
+      <details class="sos-item topic" open>
+        <summary>Como ler o laboratório <span class="where">curva e medidores</span></summary>
+        <div class="sos-body">
+          <ul>
+            <li><strong>Linha tracejada:</strong> o som sem nada. O que entra é o que sai.</li>
+            <li><strong>Linha âmbar:</strong> o som processado. Onde ela entorta para baixo, o compressor está abaixando. Depois do threshold, quanto mais deitada, maior o ratio.</li>
+            <li><strong>Linha azul:</strong> o threshold do gate. Abaixo dela, o som cai pelo valor do range.</li>
+            <li><strong>Ponto branco:</strong> o nível que o compressor está vendo agora e o que sai com a redução aplicada de fato. Com attack lento, ele demora para descer até a curva; com release lento, demora para voltar.</li>
+            <li><strong>Redução (GR):</strong> quanto o compressor está abaixando neste instante. Ele deve se mexer com a música e voltar perto de zero nas partes fracas.</li>
+            <li><strong>Histórico:</strong> os últimos 6 segundos. A área cinza é a entrada, a linha âmbar é a saída, o vermelho no alto é a redução e o azul mostra quando o gate está aberto. É ali que dá para ver o attack e o release trabalhando.</li>
+            <li><strong>Detecção Peak ou RMS:</strong> Peak reage a cada pico, bom para bateria. RMS reage ao volume médio, mais natural em voz e fala.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Erros comuns <span class="where">o que ouvir</span></summary>
+        <div class="sos-body">
+          <ul>
+            <li><strong>Som achatado, sem respiro:</strong> threshold baixo demais com ratio alto. A redução nunca volta a zero. Teste o ponto de partida "Exagerado".</li>
+            <li><strong>Som que "bombeia":</strong> release curto demais. O volume sobe e desce no ritmo da música.</li>
+            <li><strong>Bumbo ou caixa sem ataque:</strong> attack rápido demais. O compressor come a batida antes de ela passar.</li>
+            <li><strong>Makeup alto:</strong> sobe também o vazamento do palco e aproxima a microfonia. Compare com "Ouvir sem processamento" no mesmo volume.</li>
+            <li><strong>Gate cortando a nota:</strong> threshold alto ou release curto. O tom some no meio da ressonância.</li>
+            <li><strong>Gate abrindo com o vazamento:</strong> threshold baixo demais. O chimbal e a caixa passam a abrir o canal do tom.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Na Wing <span class="where">tela do canal</span></summary>
+        <div class="sos-body">
+          <ul>
+            <li>Cada canal tem uma etapa de gate e uma de dinâmica (compressor). As duas aparecem na tela do canal, depois do filtro e perto do EQ.</li>
+            <li>Os dois têm medidor de redução na tela. É por ele que você confere se está agindo pouco ou demais.</li>
+            <li>A Wing tem vários modelos de gate e de compressor. Não troque o modelo de um canal da cena: os ajustes mudam de comportamento.</li>
+            <li>A compressão paralela da bateria é feita no bus 12, com o som comprimido somado ao normal. No laboratório, o controle Mix faz a mesma coisa dentro de um canal só.</li>
+            <li>O laboratório processa o som amostra por amostra, com os mesmos controles de um gate e de um compressor de mesa. A lógica é a mesma da Wing, mas cada modelo da Wing tem seu próprio jeito de soar.</li>
+          </ul>
+          <a class="ver" href="#processamento">Ver gate e compressão na aba Processamento</a>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="view" id="v-transmissao" hidden>
+    <div class="group">
+      <h2>Transmissão e LUFS</h2>
+      <p class="lead">A live tem uma meta de volume: −14 LUFS. Aqui está o que isso quer dizer, por que esse número e o que fazer quando a live sai alta, baixa ou diferente do salão.</p>
+    </div>
+    <div id="lufs-regua"></div>
+    <div class="sos-list">
+      <details class="sos-item topic" open>
+        <summary>O que é LUFS <span class="where">volume percebido</span></summary>
+        <div class="sos-body">
+          <div>
+            <p>LUFS mede o volume do jeito que o ouvido sente, e não o tamanho dos picos. Ele dá mais peso à região da voz, onde o ouvido é mais sensível, e menos aos graves.</p>
+          </div>
+          <div>
+            <h4>dB do medidor e LUFS medem coisas diferentes</h4>
+            <ul>
+              <li><strong>dB de pico (dBFS):</strong> diz se o som vai estourar. É o medidor dos canais e do main na mesa.</li>
+              <li><strong>LUFS:</strong> diz se o som está alto ou baixo para quem ouve. Um bumbo com pico alto pode medir pouco em LUFS, e uma voz sem picos pode medir bastante.</li>
+            </ul>
+          </div>
+          <div>
+            <h4>Os três tempos do medidor</h4>
+            <ul>
+              <li><strong>Momentâneo (0,4 s):</strong> pula o tempo todo. Serve pouco para decidir.</li>
+              <li><strong>Curto prazo (3 s):</strong> o que olhar durante o culto. Deve ficar em volta de −14 nas músicas.</li>
+              <li><strong>Integrado:</strong> a média do culto inteiro. É ele que o YouTube usa. Os silêncios não entram na conta, então intervalos entre momentos não derrubam a média.</li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Por que −14 LUFS <span class="where">YouTube</span></summary>
+        <div class="sos-body">
+          <ul>
+            <li>O YouTube mede o volume de cada vídeo e abaixa os que passam de mais ou menos −14 LUFS, para todos soarem parecidos.</li>
+            <li>Ele <strong>não sobe</strong> o que está baixo. Uma live em −20 LUFS fica 6 dB mais baixa que os outros vídeos, e quem assiste no celular acha que o som está ruim.</li>
+            <li>Passar de −14 não deixa a live mais alta: o YouTube abaixa de volta. Só sobra o som mais esmagado.</li>
+            <li>Os picos devem ficar abaixo de −1 dB. Acima disso, a conversão do YouTube pode distorcer. Quem segura isso é o limiter do Mastering.</li>
+          </ul>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Salão e live não soam igual <span class="where">mesma mix, ouvidos diferentes</span></summary>
+        <div class="sos-body">
+          <div>
+            <p>O salão e a live saem da mesma mixagem, mas quem está no salão ouve muito mais do que a mesa manda.</p>
+            <ul>
+              <li>A bateria acústica, os amplificadores e o retorno de chão soam direto no salão. Na live, só chega o que passa pelos microfones.</li>
+              <li>O salão tem a própria reverberação. Na live, o reverb dos buses 13 a 15 aparece bem mais.</li>
+              <li>A congregação cantando enche o salão. Na live, quase não aparece.</li>
+            </ul>
+          </div>
+          <div class="care">
+            <h4>Atenção</h4>
+            <p>Uma mix que soa equilibrada no salão pode chegar na live com pouca bateria e voz demais. Ouça a live no fone de tempos em tempos, lembrando que ela chega com alguns segundos de atraso.</p>
+          </div>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>O que fazer durante o culto <span class="where">por problema</span></summary>
+        <div class="sos-body">
+          <div class="freq">
+            <div><b>Baixa</b><span>Live abaixo de −18 LUFS na música<small>Se o salão está bom, o problema está no caminho da transmissão. Avise o responsável e não mexa no Mastering. Se é só a fala, suba o fader do microfone de quem está falando.</small></span></div>
+            <div><b>Alta</b><span>Live acima de −11 LUFS ou esmagada<small>O limiter do Mastering está trabalhando demais. Veja se o main está batendo no topo e abaixe o canal que mais aparece. Resolva na mix, não no plugin.</small></span></div>
+            <div><b>Fala</b><span>O pastor some ou estoura<small>A fala varia muito. Fique com a mão no fader do microfone dele. Se estourar de verdade (CLIP), abaixe um pouco o ganho.</small></span></div>
+            <div><b>Vazia</b><span>Bateria ou guitarra fracas na live<small>No salão elas soam sozinhas. Suba um pouco na mix, de olho no salão, ou peça para quem cuida da transmissão ajustar.</small></span></div>
+            <div><b>Reverb</b><span>Live com eco demais<small>Diminua o envio das vozes para os efeitos. No salão quase não muda, e a live fica mais clara.</small></span></div>
+          </div>
+        </div>
+      </details>
+      <details class="sos-item topic">
+        <summary>Meça uma gravação <span class="where">depois do culto</span></summary>
+        <div class="sos-body">
+          <p>Baixe um trecho da live, de preferência uma música inteira e um pedaço da pregação, e abra aqui. O medidor calcula o volume integrado, o máximo de curto prazo e o pico, e desenha o volume ao longo do tempo.</p>
+          <div id="lufs-app"></div>
+          <p class="note">O cálculo segue a norma usada pelo YouTube (ITU-R BS.1770). O pico mostrado é o de amostra, que pode ficar um pouco abaixo do pico verdadeiro. Para gravações longas, corte um trecho de uns 20 minutos.</p>
+        </div>
+      </details>
+    </div>
   </section>
 
   <section class="view" id="v-canais" hidden>
@@ -527,6 +735,7 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
             <h4>Atenção</h4>
             <p>Instrumento que some, falha ou parece cortado no meio da nota: desconfie do gate. O threshold está alto demais para a força com que o músico está tocando hoje.</p>
           </div>
+          <a class="ver" href="#dinamica">Abrir o laboratório de compressor e gate</a>
         </div>
       </details>
 
@@ -563,6 +772,7 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
             <h4>Atenção</h4>
             <p>Compressão com makeup alto sobe tudo que é fraco, inclusive o vazamento do palco. Em microfone de voz, isso aproxima a microfonia.</p>
           </div>
+          <a class="ver" href="#dinamica">Abrir o laboratório de compressor e gate</a>
         </div>
       </details>
 
@@ -708,7 +918,7 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
     if (c.icone && ICONES[c.icone]) box.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + ICONES[c.icone] + '</svg>';
     return box;
   }
-  var VIEWS = ['emergencia', 'mesa', 'canais', 'buses', 'processamento', 'eq', 'checklists', 'regras'];
+  var VIEWS = ['emergencia', 'mesa', 'canais', 'buses', 'processamento', 'transmissao', 'checklists', 'regras', 'ganho', 'eq', 'dinamica'];
   var cena = null;
 
   function el(tag, attrs, kids) {
@@ -1085,5 +1295,9 @@ ol.steps li > span { padding-top: 2px; min-width: 0; }
 </script>
 <script src="mesa.js"></script>
 <script src="eq.js"></script>
+<script src="fontes.js"></script>
+<script src="ganho.js"></script>
+<script src="dinamica.js"></script>
+<script src="transmissao.js"></script>
 </body>
 </html>
