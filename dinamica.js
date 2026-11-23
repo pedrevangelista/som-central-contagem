@@ -100,6 +100,9 @@
     };
   });
 
+  // O laboratório de bateria (multitrack.js) usa o mesmo processador em cada canal.
+  window.LabDinamica = { DSP: DSP };
+
   var FONTES = [
     { id: 'canto', nome: 'Voz cantando' },
     { id: 'fala', nome: 'Fala do pastor' },
